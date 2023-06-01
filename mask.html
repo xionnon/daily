@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mask</title>
+  <style>
+    .mask {
+      width: 100px;
+      height: 120px;
+      box-shadow: inset 0px 0px 30px #101922;
+      overflow-y: auto;
+      -ms-overflow-y-style: none;
+      scrollbar-width: none;
+    }
+    .mask::-webkit-scrollbar {
+        display: none;
+    }
+    .mask ul {
+      margin: 0px;
+    }
+    .mask li {
+      list-style: none;
+    }
+
+  </style>
+</head>
+
+<body>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <div id="app" />
+
+  <script setup>
+    const { createApp, defineComponent, h, render } = Vue;
+
+
+
+    const mask = defineComponent({
+      setup(_, { slots }) {
+        return () => h("div",
+          {
+            className: "mask"
+          },
+          slots.default()
+        )
+      }
+    })
+
+    const app = defineComponent({
+      setup() {
+        const lists = Array(10).fill(0).map((_, index) => index);
+        const content = h("ul",
+          lists.map(i => h("li", i))
+        )
+        return () => h(mask, null, {
+          default: () => h(content)
+        });
+      }
+    })
+
+    createApp(app).mount('#app')
+  </script>
+</body>
+
+</html>
