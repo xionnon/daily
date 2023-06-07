@@ -54,6 +54,10 @@
                     intersectionInit();
                 })
 
+                beforeUnmount(() => {
+                    img.observer && img.observer.disconnect();
+                })
+
                 return () => {
                     const imgNode = h("img", {
                         ref: imgRef,
