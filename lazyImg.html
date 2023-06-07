@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lazyImg</title>
+</head>
+
+<body>
+    <script src='https://unpkg.com/vue@3/dist/vue.global.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js'></script>
+    <div id='app' />
+
+    <script>
+        const placeholder = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAYdJREFUOE+9VFtOwkAUnTvKD37oDuwSYAXCCmQHNBES/6yJNCoYSQQ1xUT8MwGSdge4AllCl4A7wMcXxV7vbVIinZZH0jAffUznnLnnnDsFkfKAlPnEdglPzPuSFFgmFSWBwvUBu7/T2ZvdbU6SlCkV6kbzIJPJlKl2g0BaFIiIE/pm78qdl9fHq3H0u0JYrbVztKhLoKOkKoj0A0EaA+t6uJIwXEDEI3p2iVin+z7Po0CHLoV+p6FUHuISQyFCHYEk+z4TBwMlHBKg2LcavEnsWJpy1Wyj4qHvF/tPN/NN1pbMCwPZi15+elNP2yjlcMfTywft6/sH97JZh0k5CIGoA8hJr1N3N5JcMVsGCHgOe29gNZzKxV0BpDwjIu5J2/O887hKFQ8rZrtJk7cLFaDIU5XsW5B2EBDiiNIurvSQguBTMAcyoGfVIcZP7qN8VL7a2AnJktz3dRJfj5AamjzlM73oREwLqR7WWkMAOI5gx/Su/Z/j1GfeLBcNZru/r6ReWzafeoV/wOKgFWRqMKEAAAAASUVORK5CYII="
+        const { createApp, h, defineComponent, ref, computed, onMounted, reactive } = Vue;
+
+        const lazyImg = {
+            props: {
+                src: {
+                    default: "",
+                },
+                placeholder: {
+                    default: placeholder,
+                }
+            },
+            setup(props, { slots }) {
+
+                const img = reactive({
+                    isIntersected: false,
+                    observer: null,
+                })
+                const imgRef = ref(null);
+                const srcComputed = computed(() => {
+                    return img.isIntersected ? (props.src || placeholder) : props.placeholder;
+                });
+
+                const intersectionInit = () => {
+                    if ("IntersectionObserver" in window) {
+                        img.observer = new IntersectionObserver((entries) => {
+                            const imgNode = entries[0];
+                            if (imgNode.isIntersecting) {
+                                img.isIntersected = true;
+                                img.observer.disconnect();
+                            }
+                        })
+                        img.observer.observe(imgRef.value);
+                    }
+                }
+                /************************************ hooks ************************************/
+                onMounted(() => {
+                    intersectionInit();
+                })
+
+                return () => {
+                    const imgNode = h("img", {
+                        ref: imgRef,
+                        src: srcComputed.value,
+                    })
+
+                    return imgNode
+                }
+            }
+        }
+
+        const app = {
+            setup() {
+                return () => h(lazyImg, {
+                    src: "https://www.baidu.com/favicon.ico",
+                })
+            }
+        }
+        createApp(app).mount('#app')
+    </script>
+    <script src='https://cdn.jsdelivr.net/npm/less'></script>
+</body>
+
+</html>
